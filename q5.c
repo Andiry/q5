@@ -1,4 +1,5 @@
 #include<stdio.h>
+#include<assert.h>
 #include<stdlib.h>
 #include<math.h>
 #include<time.h>
@@ -18,21 +19,63 @@ void print_array(int **a, int num)
 void format_array(int **a, int num, int prob, int bipar)
 {
 	int i, j;
+	int *L, *R;
+	int lindex = 0, rindex = 0;
+	int x;
 
 	for (i = 0; i < num; i++)
 		a[i][i] = 0;
 
-	srand(time(NULL));
-	for (i = 0; i < num; i++) {
-		for (j = i + 1; j < num; j++) {
-			if (rand() % 100 < prob) {
-				a[i][j] = 1;
-				a[j][i] = 1;
-			} else {
-				a[i][j] = 0;
-				a[j][i] = 0;
+	if (bipar == 0) {
+		//A normal random adjacency matrix
+		srand(time(NULL));
+		for (i = 0; i < num; i++) {
+			for (j = i + 1; j < num; j++) {
+				if (rand() % 100 < prob) {
+					a[i][j] = 1;
+					a[j][i] = 1;
+				} else {
+					a[i][j] = 0;
+					a[j][i] = 0;
+				}
 			}
 		}
+	} else {
+		// A bopartite graph with edge probability 50%
+		// Format two bipartite node arrays
+		L = malloc(num * sizeof(int) / 2);
+		R = malloc(num * sizeof(int) / 2);
+
+		srand(time(NULL));
+		for (i = 0; i < num; i++) {
+			x = rand();
+			if (lindex < num / 2 && x < 50)
+				L[lindex++] = i;
+			else if (rindex < num / 2 && x >= 50)
+				R[rindex++] = i;
+			else if (lindex == num / 2)
+				R[rindex++] = i;
+			else if (rindex == num / 2)
+				L[lindex++] = i;
+		}
+		if (rindex != num / 2 || lindex != num / 2)
+			assert(0);
+
+		// Format edges from L to R
+		for (i = 0; i < num / 2; i++) {
+			for (j = 0; j < num / 2; j++) {
+				if (rand() % 100 < 50) {
+					a[L[i]][R[j]] = 1;
+					a[R[j]][L[i]] = 1;
+				} else {
+					a[L[i]][R[j]] = 0;
+					a[R[j]][L[i]] = 0;
+				}
+			}
+		}
+
+		free(L);
+		free(R);
 	}
 }
 
@@ -113,7 +156,7 @@ int main(int argc, char **argv)
 	else
 		printf("There is not a triangle in the graph\n");
 
-	printf("Algorithm takes %lld nanoseconds\n", time);
+	printf("Algorithm takes %lld microseconds\n", time / 1000);
 
 	for (i = 0; i < num_nodes; i++)
 		free(a[i]);

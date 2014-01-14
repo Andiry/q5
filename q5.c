@@ -3,6 +3,7 @@
 #include<stdlib.h>
 #include<math.h>
 #include<time.h>
+#include<string.h>
 
 void print_array(int **a, int num)
 {
@@ -98,7 +99,7 @@ void format_array(int **a, int num, int type)
 	default:
 		break;
 	}
-	printf("Matrix format finished\n");
+//	printf("Matrix format finished\n");
 }
 
 int check_triangle(int **a, int num)
@@ -145,10 +146,11 @@ int main(int argc, char **argv)
 	int type;
 	long long time;
 	struct timespec start, end;
+	FILE *output;
+	char *filename;
 
-
-	if (argc < 3) {
-		printf("Format: ./q5 $num_nodes_in_log2 $grpah_type\n");
+	if (argc < 4) {
+		printf("Format: ./q5 $num_nodes_in_log2 $grpah_type $output_file\n");
 		return 0;
 	}
 
@@ -169,6 +171,9 @@ int main(int argc, char **argv)
 		return 0;
 	}
 
+	filename = (char *)malloc(120 * sizeof(char));
+	strcpy(filename, argv[3]);
+	output = fopen(filename, "a");
 	format_array(a, num_nodes, type);
 //	print_array(a, num_nodes);
 
@@ -183,11 +188,14 @@ int main(int argc, char **argv)
 	else
 		printf("There is not a triangle in the graph\n");
 
-	printf("Algorithm takes %lld microseconds\n", time / 1000);
+	printf("%d %d, Algorithm takes %lld microseconds\n", num_nodes, type, time / 1000);
+	fprintf(output, "%d,%d,%lld\n", num_nodes, type, time / 1000);
 
 	for (i = 0; i < num_nodes; i++)
 		free(a[i]);
 	free(a);
+	free(filename);
 
+	fclose(output);
 	return 0;
 }

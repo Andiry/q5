@@ -33,6 +33,41 @@ void format_array(int **a, int num, int prob)
 	}
 }
 
+int check_triangle(int **a, int num)
+{
+	int result = 0;
+	int i, j, k;
+	int *adj_list;
+	int degree = 0;
+
+	adj_list = malloc(num * sizeof(int));
+
+	for (i = 0; i < num; i++) {
+		degree = 0;
+		//copy adjacent node numbers to adj_list
+		for (j = 0; j < num; j++) {
+			if (a[i][j])
+				adj_list[degree++] = j;
+		}
+
+		for (j = 0; j < degree; j++) {
+			for (k = j + 1; k < degree; k++) {
+				if (a[adj_list[j]][adj_list[k]]) {
+					result = 1;
+					goto found;
+				}
+			}
+		}
+	}
+
+found:
+	if (result)
+		printf("Triangle: %d %d %d\n", i, adj_list[j], adj_list[k]);
+
+	free(adj_list);
+	return result;
+}
+
 int main(void)
 {
 	int n, i;
@@ -50,18 +85,22 @@ int main(void)
 	num_nodes = pow(2, n);
 	a = malloc(num_nodes * sizeof(int *));
 	for (i = 0; i < num_nodes; i++)
-		a[i] = malloc(num_nodes + sizeof(int));
+		a[i] = malloc(num_nodes * sizeof(int));
 
 	printf("Please input the probability of edge, in percentage:\n");
 	scanf("%d", &prob);
 	format_array(a, num_nodes, prob);
 	print_array(a, num_nodes);
-//	result = check_triangle(a, num_nodes);
+	result = check_triangle(a, num_nodes);
 
 	if (result)
 		printf("There is a triangle in the graph\n");
 	else
 		printf("There is not a triangle in the graph\n");
+
+	for (i = 0; i < num_nodes; i++)
+		free(a[i]);
+	free(a);
 
 	return 0;
 }

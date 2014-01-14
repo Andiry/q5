@@ -16,22 +16,25 @@ void print_array(int **a, int num)
 	}
 }
 
-void format_array(int **a, int num, int prob, int bipar)
+void format_array(int **a, int num, int type)
 {
 	int i, j;
 	int *L, *R;
 	int lindex = 0, rindex = 0;
-	int x;
+	int x, k = 0;
+	int edges;
+	struct timespec time;
 
 	for (i = 0; i < num; i++)
 		a[i][i] = 0;
 
-	if (bipar == 0) {
-		//A normal random adjacency matrix
-		srand(time(NULL));
+	clock_gettime(CLOCK_MONOTONIC, &time);
+	srand(time.tv_nsec);
+	switch(type) {
+	case 0:	//A normal random adjacency matrix
 		for (i = 0; i < num; i++) {
 			for (j = i + 1; j < num; j++) {
-				if (rand() % 100 < prob) {
+				if (rand() % 100 < 50) {
 					a[i][j] = 1;
 					a[j][i] = 1;
 				} else {
@@ -40,13 +43,28 @@ void format_array(int **a, int num, int prob, int bipar)
 				}
 			}
 		}
-	} else {
-		// A bopartite graph with edge probability 50%
+		break;
+	case 1: // A sparse graph with edge density 4 / |V|
+		for (i = 0; i < num; i++)
+			for (j = 0; j < num; j++)
+				a[i][j] = 0;
+
+		edges = 4;
+		while (k < edges) {
+			i = rand() % num;
+			j = rand() % num;
+			if (i != j) {
+				a[i][j] = 1;
+				a[j][i] = 1;
+				k++;
+			}
+		}
+		break;
+	case 2:	// A bopartite graph with edge probability 50%
 		// Format two bipartite node arrays
 		L = malloc(num * sizeof(int) / 2);
 		R = malloc(num * sizeof(int) / 2);
 
-		srand(time(NULL));
 		for (i = 0; i < num; i++) {
 			x = rand();
 			if (lindex < num / 2 && x < 50)
@@ -76,7 +94,11 @@ void format_array(int **a, int num, int prob, int bipar)
 
 		free(L);
 		free(R);
+		break;
+	default:
+		break;
 	}
+	printf("Matrix format finished\n");
 }
 
 int check_triangle(int **a, int num)
@@ -120,29 +142,34 @@ int main(int argc, char **argv)
 	int num_nodes;
 	int **a;
 	int result;
-	int prob;
-	int bipar;
+	int type;
 	long long time;
 	struct timespec start, end;
 
 
-	if (argc < 4) {
-		printf("Format: ./q5 $num_nodes_in_log2 $edge_density_in_percentage $if_bipartite\n");
+	if (argc < 3) {
+		printf("Format: ./q5 $num_nodes_in_log2 $grpah_type\n");
 		return 0;
 	}
 
 	n = atoi(argv[1]);
-	if (n <= 0)
+	if (n <= 0) {
+		printf("num_nodes_in_log2 must be larger than 0\n");
 		return 0;
+	}
 
 	num_nodes = pow(2, n);
 	a = malloc(num_nodes * sizeof(int *));
 	for (i = 0; i < num_nodes; i++)
 		a[i] = malloc(num_nodes * sizeof(int));
 
-	prob = atoi(argv[2]);
-	bipar = atoi(argv[3]);
-	format_array(a, num_nodes, prob, bipar);
+	type = atoi(argv[2]);
+	if (type < 0 || type > 2) {
+		printf("type must be 0(random graph with 50%% edge probability), 1(random sparse graph), or 2(bipartie grpah).\n");
+		return 0;
+	}
+
+	format_array(a, num_nodes, type);
 //	print_array(a, num_nodes);
 
 	clock_gettime(CLOCK_MONOTONIC, &start);

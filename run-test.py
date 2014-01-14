@@ -17,6 +17,7 @@ def do_work(num, graph_type, filename):
 def main():
 	date = time.strftime("%Y-%m-%d_%X", time.localtime(time.time()))
 	filename = "result_" + date + ".csv"
+	filename = filename.replace(':', '-')
 	print filename
 	f = open(filename, 'w')
 	f.write("Num_nodes, Graph type, time(us)\n")

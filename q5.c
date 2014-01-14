@@ -50,11 +50,13 @@ void format_array(int **a, int num, int type)
 			for (j = 0; j < num; j++)
 				a[i][j] = 0;
 
-		edges = 4;
+		edges = 2 * num;
+		if (edges > num * (num - 1) / 2)
+			edges = num * (num - 1) / 2;
 		while (k < edges) {
 			i = rand() % num;
 			j = rand() % num;
-			if (i != j) {
+			if (i != j && a[i][j] == 0) {
 				a[i][j] = 1;
 				a[j][i] = 1;
 				k++;

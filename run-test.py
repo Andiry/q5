@@ -20,7 +20,7 @@ def main():
 	filename = filename.replace(':', '-')
 	print filename
 	f = open(filename, 'w')
-	f.write("Num_nodes, Graph type, time(us)\n")
+	f.write("Num_nodes, Graph type, time(ns)\n")
 	file.close(f)
 
 	print "Strating..."

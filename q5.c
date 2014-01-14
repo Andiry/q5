@@ -189,7 +189,7 @@ int main(int argc, char **argv)
 		printf("There is not a triangle in the graph\n");
 
 	printf("%d %d, Algorithm takes %lld microseconds\n", num_nodes, type, time / 1000);
-	fprintf(output, "%d,%d,%lld\n", num_nodes, type, time / 1000);
+	fprintf(output, "%d,%d,%lld\n", num_nodes, type, time);
 
 	for (i = 0; i < num_nodes; i++)
 		free(a[i]);
